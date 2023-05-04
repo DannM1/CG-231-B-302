@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Daniela Porras Matiz</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    #text {
+      position: absolute;
+      padding: 10px;
+      width: 100%;
+      text-align: left;
+      color: #000000;
+    }
+  </style>
+</head>
+
+<body>
+  <div></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r94/three.min.js"></script>
+  <script type="module">
+    import { OrbitControls } from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls';
+
+    //Escena, cvamara y render
+    let scene = new THREE.Scene();
+    let camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 1000);
+    let renderer = new THREE.WebGLRenderer();
+    renderer.setClearColor(0x000000, 1.0);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    let controls = new OrbitControls(camera, renderer.domElement);
+
+    //Parámetros del plano
+    let origin = new THREE.Vector3(0, 0, 0);
+    let x = new THREE.Vector3(1, 0, 0);
+    let y = new THREE.Vector3(0, 1, 0);
+    let z = new THREE.Vector3(0, 0, 1);
+
+    //Grilla
+    var gridHelperXZ = new THREE.GridHelper(700, 20, 0x333333, 0x333333);
+
+    //Plano
+    var arrowX = new THREE.ArrowHelper(x, origin, 40, 0xAA0000);
+    var arrowY = new THREE.ArrowHelper(y, origin, 40, 0x00AA00);
+    var arrowZ = new THREE.ArrowHelper(z, origin, 40, 0x0000AA);
+
+    //Posición cámara
+    camera.position.x = 300;
+    camera.position.y = 300;
+    camera.position.z = 300;
+    camera.lookAt(scene.position);
+    document.body.appendChild(renderer.domElement);
+
+
+    function crearFigura3D(numLados, longitudAristas) {
+      // Calculamos el ángulo entre cada vértice en función del número de lados
+      var angulo = (2 * Math.PI) / numLados;
+
+      // Definimos un array para almacenar los vértices
+      var vertices = [];
+
+      // Calculamos las coordenadas de los vértices y las almacenamos en el array
+      for (var i = 0; i < numLados; i++) {
+        var x = Math.cos(i * angulo) * longitudAristas / 2;
+        var y = Math.sin(i * angulo) * longitudAristas / 2;
+        vertices.push(new THREE.Vector3(x, y, 5));
+      }
+
+      // Definimos las caras de la figura
+      var faces = [];
+      for (var i = 0; i < numLados - 2; i++) {
+        faces.push(new THREE.Face3(0, i + 1, i + 2));
+      }
+      faces.push(new THREE.Face3(0, numLados - 1, 1));
+
+      // Creamos la geometría y añadimos los vértices y caras
+      var geometry = new THREE.Geometry();
+      geometry.vertices = vertices;
+      geometry.faces = faces;
+
+      // Calculamos las normales y centros de cada cara
+      geometry.computeFaceNormals();
+      geometry.computeVertexNormals();
+
+      // Creamos un material y una malla a partir de la geometría
+      var material = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        wireframe: true,
+      });
+      var mesh = new THREE.Mesh(geometry, material);
+     
+
+      // Devolvemos la malla
+      return mesh;
+    }
+    var figura = crearFigura3D(10, 20);
+    //Agregar 
+    scene.add(gridHelperXZ);
+    scene.add(arrowX);
+    scene.add(arrowY);
+    scene.add(arrowZ);
+    scene.add(figura);
+    
+
+    //Animate
+    function render() {
+      requestAnimationFrame(render);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    render();
+  </script>
+</body>
+
+</html>

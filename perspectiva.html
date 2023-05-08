@@ -51,62 +51,58 @@
     var arrowZ = new THREE.ArrowHelper(z, origin, 40, 0x0000AA);
 
     //Posición cámara
-    camera.position.x = 300;
-    camera.position.y = 300;
-    camera.position.z = 300;
+    camera.position.x = 100;
+    camera.position.y = 100;
+    camera.position.z = 100;
     camera.lookAt(scene.position);
     document.body.appendChild(renderer.domElement);
 
+  function crearfigura3D(numLados) {
+  var geometry = new THREE.Geometry();
+  var radio = 1;
+  var phi = (1 + Math.sqrt(5)) / 2; 
 
-    function crearFigura3D(numLados, longitudAristas) {
-      // Calculamos el ángulo entre cada vértice en función del número de lados
-      var angulo = (2 * Math.PI) / numLados;
+  // Calculamos coordenada de los vertices y se crean
+  for (let i = 0; i < numLados ; i++) {
+    const theta = (2 * Math.PI * i) / numLados;
+    const x = radio * Math.cos(theta);
+    const y = radio * Math.sin(theta);
+    const z = i % 2 === 0 ? phi : -phi; // alternar coordenadas
+    geometry.vertices.push(new THREE.Vector3(x, y, z));
+  }
 
-      // Definimos un array para almacenar los vértices
-      var vertices = [];
+  // Se crean y definen las caras de la figura 
+  for (let i = 0; i < numLados; i++) {
+    const i1 = i;
+    const i2 = (i + 1) % numLados;
+    const i3 = (i + numLados / 2) % numLados;
+    const face1 = new THREE.Face3(i1, i2, i3);
+    const face2 = new THREE.Face3(i1, i3, i2);
+    geometry.faces.push(face1);
+    geometry.faces.push(face2);
+  }
 
-      // Calculamos las coordenadas de los vértices y las almacenamos en el array
-      for (var i = 0; i < numLados; i++) {
-        var x = Math.cos(i * angulo) * longitudAristas / 2;
-        var y = Math.sin(i * angulo) * longitudAristas / 2;
-        vertices.push(new THREE.Vector3(x, y, 5));
-      }
+  //Devuelve mesh
+  geometry.computeFaceNormals();
+  const Color = new THREE.Color("rgb(0,0,0)");
+  const material =   new THREE.MeshBasicMaterial({Color, wireframe : true});
 
-      // Definimos las caras de la figura
-      var faces = [];
-      for (var i = 0; i < numLados - 2; i++) {
-        faces.push(new THREE.Face3(0, i + 1, i + 2));
-      }
-      faces.push(new THREE.Face3(0, numLados - 1, 1));
+  const mesh = new THREE.Mesh(geometry,material);
+  mesh.scale.set(10, 10, 10); // escalar la figura por un factor de 2
 
-      // Creamos la geometría y añadimos los vértices y caras
-      var geometry = new THREE.Geometry();
-      geometry.vertices = vertices;
-      geometry.faces = faces;
+  return mesh;
+}   
 
-      // Calculamos las normales y centros de cada cara
-      geometry.computeFaceNormals();
-      geometry.computeVertexNormals();
 
-      // Creamos un material y una malla a partir de la geometría
-      var material = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        wireframe: true,
-      });
-      var mesh = new THREE.Mesh(geometry, material);
-     
+// Crear figura
+const figura = crearfigura3D(30);
 
-      // Devolvemos la malla
-      return mesh;
-    }
-    var figura = crearFigura3D(10, 20);
     //Agregar 
     scene.add(gridHelperXZ);
     scene.add(arrowX);
     scene.add(arrowY);
-    scene.add(arrowZ);
+    scene.add(arrowZ);    
     scene.add(figura);
-    
 
     //Animate
     function render() {
@@ -118,5 +114,4 @@
     render();
   </script>
 </body>
-
 </html>
